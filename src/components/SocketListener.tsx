@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { ServerBot, convertServerBotToBot, type Bot } from '@/lib/mockData';
-const ipbe = 'http://localhost:3001'
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 // Kết nối tới backend (đúng địa chỉ và port backend)
-const socket = io(ipbe, {
+const socket = io(backendUrl, {
   transports: ['websocket', 'polling'], // Thử cả websocket và polling
   timeout: 20000, // Timeout 20 giây
   forceNew: true, // Tạo connection mới

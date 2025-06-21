@@ -9,8 +9,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import SocketListener from '@/components/SocketListener';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { generateMockBots, type Bot } from '@/lib/mockData';
-const ipbe = 'http://localhost:3001';
+import { type Bot } from '@/lib/mockData';
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const Index = () => {
   const [bots, setBots] = useState<Bot[]>([]);
@@ -20,14 +20,10 @@ const Index = () => {
   const [connectionStatus, setConnectionStatus] = useState('Connecting...');
 
   useEffect(() => {
-    // Initialize with mock data (fallback khi chưa kết nối server)
-    setBots(generateMockBots(12));
-    
-    // Check for saved theme
+    // Không khởi tạo mock data nữa, chỉ xử lý theme
     const savedTheme = localStorage.getItem('theme');
     const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
     setDarkMode(isDark);
-    
     if (isDark) {
       document.documentElement.classList.add('dark');
     }
@@ -60,7 +56,7 @@ const Index = () => {
   const handleBotAction = async (botId: string, action: string) => {
     console.log('Gửi API:', botId, action);
     try {
-      await fetch(`${ipbe}/api/bots/${botId}/action`, {
+      await fetch(`${backendUrl}/api/bots/${botId}/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
