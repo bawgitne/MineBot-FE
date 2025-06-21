@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Test - Ping & WarpName</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .connecting { background-color: #fff3cd; color: #856404; }
+        .log {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .event { color: #007bff; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>Socket Test - Checking Ping & WarpName</h1>
+    <div id="status">Connecting...</div>
+    <div id="data"></div>
+
+    <script>
+        const socket = io('http://localhost:3001', {
+            transports: ['websocket', 'polling'],
+            timeout: 20000,
+            forceNew: true,
+        });
+
+        const statusDiv = document.getElementById('status');
+        const dataDiv = document.getElementById('data');
+
+        socket.on('connect', () => {
+            statusDiv.innerHTML = 'Connected to server';
+            statusDiv.style.color = 'green';
+        });
+
+        socket.on('hello', (data) => {
+            statusDiv.innerHTML = 'Hello received from server';
+            statusDiv.style.color = 'blue';
+        });
+
+        socket.on('disconnect', (reason) => {
+            statusDiv.innerHTML = 'Disconnected: ' + reason;
+            statusDiv.style.color = 'red';
+        });
+
+        socket.on('connect_error', (error) => {
+            statusDiv.innerHTML = 'Connection error: ' + error.message;
+            statusDiv.style.color = 'red';
+        });
+
+        socket.on('allbot', (botsArray) => {
+            console.log('Raw allbot data:', botsArray);
+            
+            if (!Array.isArray(botsArray)) {
+                dataDiv.innerHTML = '<p style="color: red;">Error: Data is not an array!</p>';
+                return;
+            }
+
+            let html = '<h2>Received Bot Data:</h2>';
+            
+            botsArray.forEach((bot, index) => {
+                html += `<div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">`;
+                html += `<h3>Bot #${index + 1}</h3>`;
+                html += `<p><strong>Raw data:</strong> ${JSON.stringify(bot, null, 2)}</p>`;
+                html += `<p><strong>ID:</strong> ${bot.id || 'MISSING'}</p>`;
+                html += `<p><strong>Username:</strong> ${bot.username || 'MISSING'}</p>`;
+                html += `<p><strong>State:</strong> ${bot.state || 'MISSING'}</p>`;
+                html += `<p><strong>Ping:</strong> ${bot.ping !== undefined ? bot.ping : 'UNDEFINED'} (type: ${typeof bot.ping})</p>`;
+                html += `<p><strong>WarpName:</strong> ${bot.warpName || 'MISSING'} (type: ${typeof bot.warpName})</p>`;
+                html += `<p><strong>Warpname (lowercase):</strong> ${bot.warpname || 'MISSING'} (type: ${typeof bot.warpname})</p>`;
+                html += `<p><strong>Durability:</strong> ${bot.durability !== undefined ? bot.durability : 'UNDEFINED'}</p>`;
+                html += `<p><strong>BlocksMinedToday:</strong> ${bot.blocksMinedToday || 'MISSING'}</p>`;
+                html += `<p><strong>Repair:</strong> ${bot.repair !== undefined ? bot.repair : 'UNDEFINED'} (type: ${typeof bot.repair})</p>`;
+                html += `<p><strong>Noti:</strong> ${bot.noti !== undefined ? bot.noti : 'UNDEFINED'} (type: ${typeof bot.noti})</p>`;
+                html += `<p><strong>BlockId:</strong> ${bot.blockId || 'MISSING'}</p>`;
+                html += `<p><strong>JoinServer:</strong> ${bot.joinServer || 'MISSING'}</p>`;
+                html += `<p><strong>Logs:</strong> ${bot.logs ? bot.logs.length + ' entries' : 'MISSING'}</p>`;
+                html += `</div>`;
+            });
+            
+            dataDiv.innerHTML = html;
+        });
+    </script>
+</body>
+</html> 
