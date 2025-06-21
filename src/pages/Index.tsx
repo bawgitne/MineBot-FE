@@ -67,34 +67,18 @@ const Index = () => {
     }
   };
 
-  const handleCreateBot = (botData: { username: string; warp: string; password: string }) => {
-    const joinServerDate = new Date();
-    const newBot: Bot = {
-      id: `bot-${Date.now()}`,
-      username: botData.username,
-      warpName: botData.warp,
-      status: 'idle',
-      currentBlock: 'N/A',
-      durability: 1561,
-      ping: 0,
-      chunksLoaded: false,
-      blocksMinedToday: 0,
-      repairCount: 0,
-      uptime: 0,
-      history: [{
-        timestamp: joinServerDate,
-        action: 'Created',
-        details: `Bot created with warp ${botData.warp}`,
-      }],
-      logs: [{
-        message: `Bot ${botData.username} đã được tạo thành công`,
-        timestamp: joinServerDate,
-      }],
-      joinServer: joinServerDate,
-    };
-    
-    setBots(prevBots => [...prevBots, newBot]);
-    console.log('Created new bot:', newBot);
+  const handleCreateBot = async (botData: { username: string; warp: string; password: string }) => {
+    try {
+      const res = await fetch(`${backendUrl}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(botData),
+      });
+      if (!res.ok) throw new Error('Tạo bot thất bại');
+      // Không cập nhật state ở đây! Server sẽ trả về danh sách bot mới qua socket hoặc API
+    } catch (err) {
+      alert('Tạo bot thất bại: ' + (err instanceof Error ? err.message : err));
+    }
   };
 
   const activeBotsCount = bots.filter(bot => bot.status === 'mining').length;
